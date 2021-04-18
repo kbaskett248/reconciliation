@@ -1,4 +1,4 @@
-from typing import List, Sequence
+from typing import Generator, List
 import pathlib
 import re
 from .day import Day
@@ -25,18 +25,21 @@ class Portfolio:
             return cls.from_lines(line.strip() for line in file_.readlines())
 
     @classmethod
-    def from_lines(cls, lines: Sequence[str]) -> "Portfolio":
+    def from_lines(cls, lines: Generator[str, None, None]) -> "Portfolio":
         portfolio = Portfolio()
+        day = None
+        type_ = None
 
         for line in lines:
-            print("line", line, "end")
             match = cls.heading_matcher.fullmatch(line)
-            print(match)
+
             if line == "":
                 continue
             elif match is not None:
                 day = portfolio.get_day(int(match.group("day_num")))
                 type_ = match.group("type")
+            elif not day or not type_:
+                continue
             elif type_ == "TRN":
                 transaction = Transaction.from_string(line)
                 day.add_transaction(transaction)
