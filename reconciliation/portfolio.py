@@ -1,11 +1,20 @@
-from typing import Generator, List
 import pathlib
 import re
+from typing import Dict, Iterable, List, Optional
+
 from .day import Day
 from .transaction import Transaction
 
 
 class Portfolio:
+    """Class representing a portfolio over one or more days.
+
+    The portfolio stores a number of days, accessible via the offset since the
+    Portfolio was started. Each Day stores the transactions that occurred that
+    day and the positions at the end of the day.
+
+    """
+
     heading_matcher = re.compile(r"D(?P<day_num>\d+)-(?P<type>\w+)")
     _days: List[Day]
 
@@ -13,19 +22,126 @@ class Portfolio:
         self._days = []
 
     def get_day(self, day_num: int) -> Day:
+        """Return the nth day since the Portfolio was opened.
+
+        Args:
+            day_num (int): The day offset to return
+
+        Returns:
+            Day: The nth Day in the Portfolio
+        """
         while True:
             try:
                 return self._days[day_num]
             except IndexError:
                 self._days.append(Day())
 
+    def reconcile(
+        self, end_day: int, start_day: int = 0, output_path: pathlib.Path = None
+    ) -> Optional[Dict[str, float]]:
+        """Reconcile the positions and transactions in the Portfolio.
+
+        Apply the transactions from start_day to end_day to the positions on
+        start_day. Then return the difference between the positions on end_day
+        with the computed positions.
+
+        Args:
+            end_day (int): End with this day when computing reconciliation. The
+                positions on this day will be compared to the computed positions.
+            start_day (int, optional): Start with this day's positions when
+                computing positions. The transactions from each successive day
+                will be applied to these positions. Defaults to 0.
+            output_path (pathlib.Path, optional): If specified, write the
+                output to the specified path. Defaults to None. Output is
+                written as follows:
+
+                <Symbol> <Difference>
+                <Symbol> <Difference>
+                ...
+
+        Returns:
+            Dict[str, float]: A dictionary mapping a symbol to the difference
+                between the day's position and the computed position for that
+                symbol
+        """
+        positions = self.get_day(start_day).get_positions()
+
+        for day in (self.get_day(i) for i in range(start_day + 1, end_day + 1)):
+            for transaction in day.transaction_iter():
+                transaction.apply(positions)
+
+        recon = self.get_day(end_day).reconcile(positions)
+
+        if output_path:
+            with open(output_path, "w") as file_:
+                for key, value in sorted(recon.items()):
+                    file_.write(f"{key} {value:g}\n")
+
+        return recon
+
     @classmethod
     def from_file(cls, path: pathlib.Path) -> "Portfolio":
+        """Initialize a new Portfolio by reading an input file.
+
+        The file format is as follows. D0-POS means the positions on Day 0.
+        D1-TRN means the transactions on Day 1.
+
+        ```
+        D0-POS
+        <Symbol> <Quantity>
+        <Symbol> <Quantity>
+        ...
+
+        D1-TRN
+        <Symbol> <Operation> <Quantity> <Value>
+        <Symbol> <Operation> <Quantity> <Value>
+        ...
+
+        D1-POS
+        <Symbol> <Quantity>
+        <Symbol> <Quantity>
+        ...
+
+        ...
+        ```
+
+        Returns:
+            Portfolio: A Portfolio object containing the Days defined by the
+                input file
+        """
         with open(path, "r") as file_:
             return cls.from_lines(line.strip() for line in file_.readlines())
 
     @classmethod
-    def from_lines(cls, lines: Generator[str, None, None]) -> "Portfolio":
+    def from_lines(cls, lines: Iterable[str]) -> "Portfolio":
+        """Initialize a new Portfolio by parsing the given lines.
+
+        The lines should match the following format. D0-POS means the positions
+        on Day 0. D1-TRN means the transactions on Day 1.
+
+        ```
+        D0-POS
+        <Symbol> <Quantity>
+        <Symbol> <Quantity>
+        ...
+
+        D1-TRN
+        <Symbol> <Operation> <Quantity> <Value>
+        <Symbol> <Operation> <Quantity> <Value>
+        ...
+
+        D1-POS
+        <Symbol> <Quantity>
+        <Symbol> <Quantity>
+        ...
+
+        ...
+        ```
+
+        Returns:
+            Portfolio: A Portfolio object containing the Days defined by the
+                input file
+        """
         portfolio = Portfolio()
         day = None
         type_ = None
