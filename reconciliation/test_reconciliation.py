@@ -50,7 +50,7 @@ class TestPortfolio(unittest.TestCase):
 
         output_file_path = pathlib.Path("recon.out")
         try:
-            portfolio.reconcile(1, output_path=output_file_path)
+            portfolio.reconcile(output_path=output_file_path)
 
             with open(output_file_path, "r") as file_:
                 output = file_.read()

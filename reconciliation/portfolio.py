@@ -37,7 +37,7 @@ class Portfolio:
                 self._days.append(Day())
 
     def reconcile(
-        self, end_day: int, start_day: int = 0, output_path: pathlib.Path = None
+        self, start_day: int = 0, end_day: int = -1, output_path: pathlib.Path = None
     ) -> Optional[Dict[str, float]]:
         """Reconcile the positions and transactions in the Portfolio.
 
@@ -46,11 +46,13 @@ class Portfolio:
         with the computed positions.
 
         Args:
-            end_day (int): End with this day when computing reconciliation. The
-                positions on this day will be compared to the computed positions.
             start_day (int, optional): Start with this day's positions when
                 computing positions. The transactions from each successive day
                 will be applied to these positions. Defaults to 0.
+            end_day (int): End with this day when computing reconciliation. The
+                positions on this day will be compared to the computed positions.
+                Slicing is used, so negative offsets can be used. Defaults to
+                -1.
             output_path (pathlib.Path, optional): If specified, write the
                 output to the specified path. Defaults to None. Output is
                 written as follows:
@@ -64,12 +66,18 @@ class Portfolio:
                 between the day's position and the computed position for that
                 symbol
         """
+        if end_day < 0:
+            end_day = len(self._days) + end_day
+
+        # Starting positions
         positions = self.get_day(start_day).get_positions()
 
+        # Apply transactions successively to starting positions
         for day in (self.get_day(i) for i in range(start_day + 1, end_day + 1)):
             for transaction in day.transaction_iter():
                 transaction.apply(positions)
 
+        # Reconcile the computed positions with the positions on end_day
         recon = self.get_day(end_day).reconcile(positions)
 
         if output_path:
