@@ -1,7 +1,7 @@
 import pathlib
 import unittest
 
-from .portfolio import Portfolio
+from . import reconcile_file
 
 RECONCILIATION_INPUT = """
 D0-POS
@@ -40,23 +40,19 @@ class TestPortfolio(unittest.TestCase):
         """Verify that reconciliation produces the correct output file."""
 
         input_file_path = pathlib.Path("recon.in")
+        output_file_path = pathlib.Path("recon.out")
         try:
             with open(input_file_path, "w") as file_:
                 file_.write(RECONCILIATION_INPUT)
 
-            portfolio = Portfolio.from_file(input_file_path)
-        finally:
-            input_file_path.unlink()
-
-        output_file_path = pathlib.Path("recon.out")
-        try:
-            portfolio.reconcile(output_path=output_file_path)
+            reconcile_file(input_file_path, output_file_path)
 
             with open(output_file_path, "r") as file_:
                 output = file_.read()
 
             self.assertEqual(output, RECONCILIATION_OUTPUT)
         finally:
+            input_file_path.unlink()
             output_file_path.unlink()
 
 
