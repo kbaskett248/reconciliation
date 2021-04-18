@@ -1,5 +1,5 @@
 import copy
-from typing import Dict, Iterator, List, Tuple
+from typing import Dict, Iterator, List
 
 from .transaction import Transaction
 
@@ -58,3 +58,28 @@ class Day:
             Iterator[Transaction]: An iterator over the transactions of the day
         """
         return iter(self._transactions)
+
+    def reconcile(self, positions: Dict[str, float]) -> Dict[str, float]:
+        """Return a reconciliation of the Day's positions with the given positions.
+
+        The reconciliation is a mapping between symbol and the difference in
+        shares of that symbol between the positions for the day and the given
+        positions.
+
+        Args:
+            positions (Dict[str, float]): A Dictionary mapping a symbol to a
+                quantity of that symbol.
+
+        Returns:
+            Dict[str, float]: The reconciliation expressing the difference
+                between the day's positions and the specified positions
+        """
+        keys = set(self._positions.keys()).union(positions.keys())
+
+        result = {}
+        for key in keys:
+            difference = self._positions.get(key, 0) - positions.get(key, 0)
+            if difference == 0:
+                continue
+            result[key] = difference
+        return result
