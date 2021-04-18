@@ -3,7 +3,6 @@ import unittest
 
 from .portfolio import Portfolio
 
-
 RECONCILIATION_INPUT = """
 D0-POS
 AAPL 100
@@ -35,24 +34,30 @@ MSFT 10
 
 
 class TestPortfolio(unittest.TestCase):
+    """Test suite for the Portfolio class."""
+
     def test_reconciliation(self):
+        """Verify that reconciliation produces the correct output file."""
+
+        input_file_path = pathlib.Path("recon.in")
         try:
-            with open("recon.in", "w") as file_:
+            with open(input_file_path, "w") as file_:
                 file_.write(RECONCILIATION_INPUT)
 
-            portfolio = Portfolio.from_file("recon.in")
+            portfolio = Portfolio.from_file(input_file_path)
         finally:
-            pathlib.Path("recon.in").unlink()
-        
-        try:
-            portfolio.reconcile(1).to_file("recon.out")
+            input_file_path.unlink()
 
-            with open("recon.out", "r") as file_:
+        output_file_path = pathlib.Path("recon.out")
+        try:
+            portfolio.reconcile(1, output_file_path)
+
+            with open(output_file_path, "r") as file_:
                 output = file_.read()
 
             self.assertEqual(output, RECONCILIATION_OUTPUT)
         finally:
-            pathlib.Path("recon.out").unlink()
+            output_file_path.unlink()
 
 
 if __name__ == "__main__":
