@@ -23,14 +23,14 @@ GOOG 220
 SP500 175.75
 Cash 20000
 MSFT 10
-"""
+""".lstrip()
 
 RECONCILIATION_OUTPUT = """
 Cash 8000
 GOOG 10
-TD -100
 MSFT 10
-"""
+TD -100
+""".lstrip()
 
 
 class TestPortfolio(unittest.TestCase):
@@ -50,7 +50,7 @@ class TestPortfolio(unittest.TestCase):
 
         output_file_path = pathlib.Path("recon.out")
         try:
-            portfolio.reconcile(1, output_file_path)
+            portfolio.reconcile(1, output_path=output_file_path)
 
             with open(output_file_path, "r") as file_:
                 output = file_.read()
