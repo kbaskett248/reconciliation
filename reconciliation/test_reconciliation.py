@@ -33,8 +33,8 @@ TD -100
 """.lstrip()
 
 
-class TestPortfolio(unittest.TestCase):
-    """Test suite for the Portfolio class."""
+class TestAccount(unittest.TestCase):
+    """Test suite for the Account class."""
 
     def test_reconciliation(self):
         """Verify that reconciliation produces the correct output file."""

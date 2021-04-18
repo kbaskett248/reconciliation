@@ -6,11 +6,11 @@ from .day import Day
 from .transaction import Transaction
 
 
-class Portfolio:
-    """Class representing a portfolio over one or more days.
+class Account:
+    """Class representing a account over one or more days.
 
-    The portfolio stores a number of days, accessible via the offset since the
-    Portfolio was started. Each Day stores the transactions that occurred that
+    The account stores a number of days, accessible via the offset since the
+    Account was started. Each Day stores the transactions that occurred that
     day and the positions at the end of the day.
 
     """
@@ -22,13 +22,13 @@ class Portfolio:
         self._days = []
 
     def get_day(self, day_num: int) -> Day:
-        """Return the nth day since the Portfolio was opened.
+        """Return the nth day since the Account was opened.
 
         Args:
             day_num (int): The day offset to return
 
         Returns:
-            Day: The nth Day in the Portfolio
+            Day: The nth Day in the Account
         """
         while True:
             try:
@@ -39,7 +39,7 @@ class Portfolio:
     def reconcile(
         self, start_day: int = 0, end_day: int = -1, output_path: pathlib.Path = None
     ) -> Optional[Dict[str, float]]:
-        """Reconcile the positions and transactions in the Portfolio.
+        """Reconcile the positions and transactions in the Account.
 
         Apply the transactions from start_day to end_day to the positions on
         start_day. Then return the difference between the positions on end_day
@@ -88,8 +88,8 @@ class Portfolio:
         return recon
 
     @classmethod
-    def from_file(cls, path: pathlib.Path) -> "Portfolio":
-        """Initialize a new Portfolio by reading an input file.
+    def from_file(cls, path: pathlib.Path) -> "Account":
+        """Initialize a new Account by reading an input file.
 
         The file format is as follows. D0-POS means the positions on Day 0.
         D1-TRN means the transactions on Day 1.
@@ -114,15 +114,15 @@ class Portfolio:
         ```
 
         Returns:
-            Portfolio: A Portfolio object containing the Days defined by the
+            Account: A Account object containing the Days defined by the
                 input file
         """
         with open(path, "r") as file_:
             return cls.from_lines(line.strip() for line in file_.readlines())
 
     @classmethod
-    def from_lines(cls, lines: Iterable[str]) -> "Portfolio":
-        """Initialize a new Portfolio by parsing the given lines.
+    def from_lines(cls, lines: Iterable[str]) -> "Account":
+        """Initialize a new Account by parsing the given lines.
 
         The lines should match the following format. D0-POS means the positions
         on Day 0. D1-TRN means the transactions on Day 1.
@@ -147,10 +147,10 @@ class Portfolio:
         ```
 
         Returns:
-            Portfolio: A Portfolio object containing the Days defined by the
+            Account: A Account object containing the Days defined by the
                 input file
         """
-        portfolio = Portfolio()
+        account = Account()
         day = None
         type_ = None
 
@@ -160,7 +160,7 @@ class Portfolio:
             if line == "":
                 continue
             elif match is not None:
-                day = portfolio.get_day(int(match.group("day_num")))
+                day = account.get_day(int(match.group("day_num")))
                 type_ = match.group("type")
             elif not day or not type_:
                 continue
@@ -171,4 +171,4 @@ class Portfolio:
                 symbol, quantity = line.split(" ")
                 day.add_position(symbol, float(quantity))
 
-        return portfolio
+        return account
