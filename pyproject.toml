@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "reconciliation"
-version = "0.1.0"
+version = "1.0.0"
 description = "A simple financial text processing exercise."
 authors = ["Kenneth Baskett <kbaskett248@gmail.com>"]
 

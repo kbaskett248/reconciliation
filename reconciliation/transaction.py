@@ -1,3 +1,5 @@
+"""This module provides a Transaction class and subclasses."""
+
 from abc import abstractmethod
 from typing import Dict
 
@@ -8,6 +10,10 @@ class Transaction:
     This is a parent class which is subclassed by the concrete transaction
     types below. Each subclass implements the apply method, which mutates a
     dictionary of positions according to the transaction.
+
+    Instead of creating a Transaction directly, use the create_transaction
+    class method. This factory function will select the appropriate subclass
+    and return an instance of that subclass.
 
     Attributes:
         quantity [float]: The number of shares transacted

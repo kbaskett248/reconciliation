@@ -1,3 +1,10 @@
+"""This module provides a Day class.
+
+The Day consists of a list of transactions that occurred during the day and
+a list of positions at the end of the day.
+
+"""
+
 import copy
 from typing import Dict, Iterator, List
 

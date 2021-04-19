@@ -1,3 +1,9 @@
+"""This module provides an Account class.
+
+The Account tracks positions and transactions over a number of days.
+
+"""
+
 import pathlib
 import re
 from typing import Dict, Iterable, List, Optional
