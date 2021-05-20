@@ -44,7 +44,7 @@ class TestAccount(unittest.TestCase):
     """Test suite for the Account class."""
 
     def test_reconciliation(self):
-        """Verify that reconciliation produces the correct output file."""
+        """Verify that reconciliation produces the correct output."""
 
         account = Account.from_lines(RECONCILIATION_INPUT.splitlines())
         self.assertEqual(account.reconcile(), RECONCILIATION_OUTPUT_DICT)
@@ -64,7 +64,7 @@ class TestAccount(unittest.TestCase):
             output_file_path.unlink()
 
     def test_reconciliation_file_input(self):
-        """Verify that reconciliation from an input file produces correct input."""
+        """Verify that reconciliation from an input file produces correct output."""
         input_file_path = pathlib.Path("recon.in")
         try:
             with open(input_file_path, "w") as file_:
