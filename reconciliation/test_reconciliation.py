@@ -3,7 +3,7 @@
 import pathlib
 import unittest
 
-from . import reconcile_file
+from .account import Account
 
 RECONCILIATION_INPUT = """
 D0-POS
@@ -34,6 +34,11 @@ MSFT 10
 TD -100
 """.lstrip()
 
+RECONCILIATION_OUTPUT_DICT = {
+    key: float(value)
+    for key, value in map(lambda l: l.split(), RECONCILIATION_OUTPUT.splitlines())
+}
+
 
 class TestAccount(unittest.TestCase):
     """Test suite for the Account class."""
@@ -41,21 +46,35 @@ class TestAccount(unittest.TestCase):
     def test_reconciliation(self):
         """Verify that reconciliation produces the correct output file."""
 
-        input_file_path = pathlib.Path("recon.in")
+        account = Account.from_lines(RECONCILIATION_INPUT.splitlines())
+        self.assertEqual(account.reconcile(), RECONCILIATION_OUTPUT_DICT)
+
+    def test_reconciliation_file_output(self):
+        """Verify that reconciliation produces the correct output file."""
         output_file_path = pathlib.Path("recon.out")
         try:
-            with open(input_file_path, "w") as file_:
-                file_.write(RECONCILIATION_INPUT)
-
-            reconcile_file(input_file_path, output_file_path)
+            account = Account.from_lines(RECONCILIATION_INPUT.splitlines())
+            account.reconcile(output_path=output_file_path)
 
             with open(output_file_path, "r") as file_:
                 output = file_.read()
 
             self.assertEqual(output, RECONCILIATION_OUTPUT)
         finally:
-            input_file_path.unlink()
             output_file_path.unlink()
+
+    def test_reconciliation_file_input(self):
+        """Verify that reconciliation from an input file produces correct input."""
+        input_file_path = pathlib.Path("recon.in")
+        try:
+            with open(input_file_path, "w") as file_:
+                file_.write(RECONCILIATION_INPUT)
+
+            account = Account.from_file(input_file_path)
+
+            self.assertEqual(account.reconcile(), RECONCILIATION_OUTPUT_DICT)
+        finally:
+            input_file_path.unlink()
 
 
 if __name__ == "__main__":
