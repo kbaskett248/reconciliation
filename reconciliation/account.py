@@ -44,7 +44,7 @@ class Account:
 
     def reconcile(
         self, start_day: int = 0, end_day: int = -1, output_path: pathlib.Path = None
-    ) -> Optional[Dict[str, float]]:
+    ) -> Dict[str, float]:
         """Reconcile the positions and transactions in the Account.
 
         Apply the transactions from start_day to end_day to the positions on
